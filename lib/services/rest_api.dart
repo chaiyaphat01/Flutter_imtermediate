@@ -10,15 +10,14 @@ class CallAPI {
     var fullURL = Uri.parse(baseURLApi + apiURL);
     var response =
         await http.post(fullURL, body: jsonEncode(data), headers: _setHeader());
-    // print(res.statusCode);
     if ((response.statusCode == 200)) {
-      print("Login success!");
-      return response.body;
+      print('Login success');
+      return jsonDecode(response.body);
     } else {
-      print("Login fail!");
-      return response.statusCode;
+      print('Login fail');
+      return jsonDecode(response.body);
     }
-    ; //retuen true false
+    //retuen true false
     // return (response.body);
   }
 }

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_api/themes/styles.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_api/services/rest_api.dart'; //call api
-import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key key}) : super(key: key);
@@ -17,6 +15,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
   //loading
   bool _isLoading = false;
+
+  //Alert Dialog
+  showAlertDialog(BuildContext context, String msg) {
+    AlertDialog alert = AlertDialog(
+      title: Text("$msg"),
+      content: Text('$msg'),
+      actions: [
+        ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text("OK"))
+      ],
+    );
+    showDialog(context: context, builder: (BuildContext context) => alert);
+  }
 
   TextEditingController mailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -289,13 +303,25 @@ class _LoginScreenState extends State<LoginScreen> {
       "password": passwordController.text
     };
     try {
-      var data = await CallAPI().postData(userData, 'login');
-      print(data);
+      var data  = await CallAPI().postData(userData, 'login');
+      print(data['success']);
+      if (data['success']) {
+        setState(() {
+          _isLoading = false;
+        });
+        showAlertDialog(context, "Login Success");
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        showAlertDialog(context, "Login Fail");
+        
+      }
+    } catch (e) {
+      print(e);
       setState(() {
         _isLoading = false;
       });
-    } catch (e) {
-      print(e);
     }
   }
 }
