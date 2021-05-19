@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_api/themes/styles.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_api/services/rest_api.dart'; //call api
+import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key key}) : super(key: key);
@@ -11,6 +14,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   String email, password;
+
+  //loading
+  bool _isLoading = false;
+
+  TextEditingController mailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
   Widget _buildLogo() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -31,6 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return (Padding(
       padding: EdgeInsets.all(8),
       child: TextFormField(
+        controller: mailController,
         keyboardType: TextInputType.emailAddress,
         onChanged: (value) {
           setState(() {
@@ -51,10 +62,11 @@ class _LoginScreenState extends State<LoginScreen> {
     return (Padding(
       padding: EdgeInsets.all(8),
       child: TextFormField(
-        // controller: passwordCOntroller,
+        controller: passwordController,
         obscureText: true,
         keyboardType: TextInputType.text,
         onChanged: (value) {
+          print(value);
           setState(() {
             password = value;
           });
@@ -98,13 +110,13 @@ class _LoginScreenState extends State<LoginScreen> {
       children: <Widget>[
         Container(
           margin: EdgeInsets.only(bottom: 20),
-          child: RaisedButton(
-            elevation: 5.0,
-            color: appTheme().primaryColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30.0),
-            ),
-            onPressed: () {},
+          child: ElevatedButton(
+            style: ButtonStyle(
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(color: Colors.red)))),
+            onPressed: _login,
             child: Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 40.0, vertical: 10.0),
@@ -227,28 +239,65 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Stack(
-            children: [
-              Container(
-                height: MediaQuery.of(context).size.height * 0.7,
-                width: MediaQuery.of(context).size.width,
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: appTheme().primaryColor,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: const Radius.circular(70),
-                        bottomRight: const Radius.circular(70),
-                      )),
-                ),
-              ),
-              Column(
-                children: [_buildLogo(), _buildContainer()],
-              )
-            ],
+        body: Center(
+          child: SingleChildScrollView(
+            child: _isLoading
+                ? Center(
+                    child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Column(
+                      children: [
+                        CircularProgressIndicator(),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text("Loading..."),
+                        )
+                      ],
+                    ),
+                  ))
+                : Stack(
+                    children: [
+                      Container(
+                        height: MediaQuery.of(context).size.height * 0.7,
+                        width: MediaQuery.of(context).size.width,
+                        child: Container(
+                          decoration: BoxDecoration(
+                              color: appTheme().primaryColor,
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: const Radius.circular(70),
+                                bottomRight: const Radius.circular(70),
+                              )),
+                        ),
+                      ),
+                      Column(
+                        children: [_buildLogo(), _buildContainer()],
+                      )
+                    ],
+                  ),
           ),
         ),
       ),
     );
   }
+
+  void _login() async {
+    setState(() {
+      _isLoading = true;
+    });
+    var userData = {
+      "email": mailController.text,
+      "password": passwordController.text
+    };
+    try {
+      var data = await CallAPI().postData(userData, 'login');
+      print(data);
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
 }
+
+//เขียน login การ login
