@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_api/themes/styles.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_api/services/rest_api.dart'; //call api
+import 'package:shared_preferences/shared_preferences.dart'; //localstorage
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key key}) : super(key: key);
@@ -295,6 +296,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() async {
+    //สร้างตัวแปรเก็บข้อมูล localStorage
+    SharedPreferences _sharedPreferances =
+        await SharedPreferences.getInstance();
+
     setState(() {
       _isLoading = true;
     });
@@ -303,22 +308,30 @@ class _LoginScreenState extends State<LoginScreen> {
       "password": passwordController.text
     };
     try {
-      var data  = await CallAPI().postData(userData, 'login');
-      print(data['success']);
+      var data = await CallAPI().postData(userData, 'login');
+      
       if (data['success']) {
         setState(() {
           _isLoading = false;
         });
+        print('success666');
+        //สร้างตัวแปรลง local Storage
+        _sharedPreferances.setString("storeName", data['data']['name']);
+        _sharedPreferances.setString("storeEmail", data['data']['email']);
+
+        //
         showAlertDialog(context, "Login Success");
+
+        //ส่งไปหน้า dash borad
+        Navigator.pushNamed(context, "/dashboard");
       } else {
         setState(() {
           _isLoading = false;
         });
         showAlertDialog(context, "Login Fail");
-        
       }
     } catch (e) {
-      print(e);
+      print(e); 
       setState(() {
         _isLoading = false;
       });
