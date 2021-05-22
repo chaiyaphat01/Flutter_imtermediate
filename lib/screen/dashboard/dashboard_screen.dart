@@ -28,7 +28,7 @@ class _DashBoradScreenState extends State<DashBoradScreen> {
 
   final List _children = [
     HomeScreen(),
-    // StockScreen(),
+    StockScreen(),
     NotificationScreen(),
     SettingScreen(),
     AccountScreen()
